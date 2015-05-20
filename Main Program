@@ -1,0 +1,847 @@
+function Set-WindowStyle {
+param(
+    [Parameter()]
+    [ValidateSet('FORCEMINIMIZE', 'HIDE', 'MAXIMIZE', 'MINIMIZE', 'RESTORE', 
+                 'SHOW', 'SHOWDEFAULT', 'SHOWMAXIMIZED', 'SHOWMINIMIZED', 
+                 'SHOWMINNOACTIVE', 'SHOWNA', 'SHOWNOACTIVATE', 'SHOWNORMAL')]
+    $Style = 'SHOW',
+    
+    [Parameter()]
+    $MainWindowHandle = (Get-Process -Id $pid).MainWindowHandle
+)
+    $WindowStates = @{
+        'FORCEMINIMIZE'   = 11;'HIDE'            = 0;'MAXIMIZE'        = 3;'MINIMIZE'        = 6;'RESTORE'         = 9;'SHOW'            = 5;'SHOWDEFAULT'     = 10;'SHOWMAXIMIZED'   = 3
+        'SHOWMINIMIZED'   = 2;'SHOWMINNOACTIVE' = 7; 'SHOWNA'          = 8;'SHOWNOACTIVATE'  = 4;'SHOWNORMAL'      = 1
+    }
+    
+    $Win32ShowWindowAsync = Add-Type -memberDefinition @"
+    [DllImport("user32.dll")] 
+    public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow); 
+
+“@ -name “Win32ShowWindowAsync” -namespace Win32Functions –passThru
+    
+    $Win32ShowWindowAsync::ShowWindowAsync($MainWindowHandle, $WindowStates[$Style]) | Out-Null
+    Write-Verbose ("Set Window Style '{1} on '{0}'" -f $MainWindowHandle, $Style)
+
+}
+
+# Hide the Black window that runs with powershell
+(Get-Process -Name powershell).MainWindowHandle | foreach { Set-WindowStyle HIDE $_ }
+
+
+# Install Powershell on the PC
+
+$CurrentUserName = $env:username
+
+
+
+#  Check for updates
+$NewBuildOut = Get-Content \\jaxdfs02\DATA\PUBLIC\SD\HelpDeskDashboard\NewestBuild\Published\NewBuild.txt
+
+$MyNewestBuild = Get-Content \\jaxdfs02\DATA\PUBLIC\SD\HelpDeskDashboard\NewestBuild\Published\NewBuild.txt
+
+
+
+
+
+$PSVersion = $PSVersionTable.PSVersion
+
+
+$CurrentAndPSVersion = $CurrentUserName + " - " + $PSVersion
+
+Add-Content "\\jaxdfs02\DATA\PUBLIC\SD\HelpDeskDashboard\Backend\TroubleShooting\PSVersion.txt"  $CurrentAndPSVersion
+
+if ($PSVersion -eq "4.0" -or $PSVersion -eq "3.0"){
+
+
+
+<#
+$script:showWindowAsync = Add-Type –memberDefinition @” 
+[DllImport("user32.dll")] 
+public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow); 
+“@ -name “Win32ShowWindowAsync” -namespace Win32Functions –passThru
+
+
+function Show-PowerShell() { 
+     $null = $showWindowAsync::ShowWindowAsync((Get-Process –id $pid).MainWindowHandle, 10) 
+}
+
+function Hide-PowerShell() { 
+    $null = $showWindowAsync::ShowWindowAsync((Get-Process –id $pid).MainWindowHandle, 2) 
+}
+
+Hide-PowerShell 
+#>
+
+
+$CurrentUserName = $env:username
+
+[IO.Directory]::CreateDirectory("\\jaxdfs02\DATA\PUBLIC\SD\GetIP\$CurrentUserName\")
+
+Cls
+
+"You may minimize this window if it is still open"
+
+Function Ricoh{
+#if($CurrentUserName -ne "ddennis"){
+Start-Process "$psHome\powershell.exe" '\\jaxdfs02\DATA\PUBLIC\SD\Ricoh\Ricoh_Webpage_Fill.ps1'
+#}
+}
+
+Function Get-Admin{
+$ieAdmin = New-Object -ComObject InternetExplorer.Application
+$ieAdmin.Visible = $true
+$ieAdmin.Navigate("https://passwordvault.ce.corp.com/PasswordVault/logon.aspx?ReturnUrl=%2fPasswordVault%2fdefault.aspx")
+while ($ieAdmin.busy) {sleep -m 500}
+
+$ieAdmin.Document.getElementById("pvBody_PageTemplate_innerHolder_ctrlLogon_txtUsername").value="ddennis"
+
+#$epwd =Get-Content C:\Users\ddennis\Documents\Backup\BackCreds\Creds.txt
+#$pwd=ConvertTo-SecureString $epwd
+#$Creds= [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pwd))
+
+#$ieAdmin.Document.getElementById("pvBody_PageTemplate_innerHolder_ctrlLogon_txtPassword").value="$Creds"
+#$ieAdmin.Document.getElementById("pvBody_PageTemplate_innerHolder_ctrlLogon_btnLogon").Click();
+
+
+# Box asking why your getting a PW - SDNumber - x-form-el-reason
+}
+
+
+Function Get-Lync{
+[void] [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
+$Lync = Get-Process | Where-Object {$_.Name -eq "lync"}
+[Microsoft.VisualBasic.Interaction]::AppActivate($Lync.ID)
+}
+
+
+Function Check-AD{
+$Global:NewUserTest = $SearchTemplate.Text
+
+if($NewUserTest -cmatch " "){
+
+$NewUserTest = $NewUserTest.Replace(",", " ")
+
+$NewUserTest = $NewUserTest.Replace(".", "")
+
+$NewUserTest12 = $NewUserTest.split(" ")
+
+$NewUserFirstLetterFirstName = $NewUserTest12[1].Substring(0,1)
+
+$CreatingUserId = $NewUserFirstLetterFirstName + $NewUserTest12[2] + $NewUserTest12[0]
+}else{$global:CreatingUserId = $NewUserTest}
+
+$UserNameLength = $CreatingUserId.Length
+
+if($UserNameLength -gt 8){
+$global:CreatingUserId = $CreatingUserId.Substring(0,8)
+}
+
+$ADIDPW = net user $CreatingUserId /domain | select-string -pattern "account"
+
+$FullName = net user $CreatingUserId /domain | select-string -pattern "Full Name"
+
+$FullName1 = [string]$FullName
+
+$FullName1 = $FullName1.Replace("Full Name                    ", "")
+
+     [System.DirectoryServices.DirectorySearcher] $searcher = New-Object System.DirectoryServices.DirectorySearcher
+     $searcher.Filter = "(&(objectCategory=User)(Name=$FullName1))"
+     $path = $searcher.Findone()
+     $user = $path.GetDirectoryEntry()
+     $userbadPwdCount = $user.badPwdCount
+     $usercmsenergyCostCenterName = $user.cmsenergyCostCenterName
+     $usercmsenergyCostCenterNumber = $user.cmsenergyCostCenterNumber
+     $usercmsenergyOffice = $user.cmsenergyOffice
+     $usertelephoneNumber = $user.telephoneNumber
+
+     $search = [ADSISearcher] ""
+     $search.Filter = "(cn=$searchString)"
+     $user = $search.FindOne()  
+
+   
+     $UserHasDialin = $user.Properties.msnpallowdialin
+     $UserHasVPN = $user.Properties.memberof.Contains("CN=VPN Users,OU=Users,OU=CE,DC=CE,DC=Corp,DC=com")
+     $UserHasInternetAccess = $user.Properties.memberof.Contains("CN=CMS_InternetAccess_G,OU=Users,OU=CE,DC=CE,DC=Corp,DC=com")
+     $UserHasWLAN = $user.Properties.memberof.Contains("CN=WLAN Users,OU=Users,OU=CE,DC=CE,DC=Corp,DC=com")
+
+     if ($UserHasWLAN -eq $True){$BPHasWLAN = "The BP is a member of WLAN Users Group"}Else{$BPHasWLAN = "The BP is NOT a member of WLAN Users Group"}
+     if ($UserHasVPN -eq $True){$BPHasVPN = "The BP is a member of VPN Users Group"}Else{$BPHasVPN = "The BP is NOT a member of VPN Users Group"}
+     if ($UserHasInternetAccess -eq $True){$BPHasInternetAccess = "The BP is a member of CMS_InternetAccess_G Group"}Else{$BPHasInternetAccess = "The BP is NOT a member of CMS_InternetAccess_G Group"}
+     if ($UserHasDialin -eq $True){$BPHasDialin = "The BP has dialin"}Else{$BPHasDialin = "The BP does NOT have dialin"}
+
+
+$NewList = @()
+foreach ($check in $ADIDPW){
+$NewList += $check
+}
+$List1 = $NewList[0]
+$List2 = $NewList[1]
+
+$BAM = [string]$List1
+$TrueOrFalse = $BAM.Contains("Yes")
+$Locked = $BAM.Contains("Locked")
+
+
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") 
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") 
+
+$objFormNew = New-Object System.Windows.Forms.Form 
+$objFormNew.Text = "$List1"
+$objFormNew.Size = New-Object System.Drawing.Size(200,200) 
+$objFormNew.StartPosition = "CenterScreen"
+$objFormNew.AutoSize = $True
+$objFormNew.AutoSizeMode = "GrowAndShrink"
+$Font = New-Object System.Drawing.Font("Times New Roman",16,[System.Drawing.FontStyle]::BOLD)
+$objFormNew.Font = $Font
+$objFormNew.BackColor = "White"
+#$objFormNew.ControlBox = $false 
+
+$objFormNew.KeyPreview = $True
+$objFormNew.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
+    {$ADAccountLocked=$ButtonYes.Text;$objFormNew.Close()}})
+$objFormNew.Add_KeyDown({if ($_.KeyCode -eq "Escape") 
+    {$ADAccountLocked=$NoButton.Text;$objFormNew.Close()}})
+
+    if($TrueOrFalse -eq $True){$objFormNew.ForeColor = "Green"}else{$objFormNew.ForeColor = "Red"}
+
+
+$objLabel = New-Object System.Windows.Forms.Label
+$objLabel.Location = New-Object System.Drawing.Size(02,02) 
+#$objLabel.Size = New-Object System.Drawing.Size(200,200) 
+$objLabel.AutoSize = $True
+
+if ($List1 -eq $null){$objFormNew.ForeColor = "Red";$objLabel.Text = "Could not find User! Make sure to use the BP User AD ID(Login ID)"}Else{
+$objLabel.Text = "$FullName
+$List1
+$List2
+Bad PW Count: $userbadPwdCount
+======================================
+$BPHasWLAN
+$BPHasVPN
+$BPHasInternetAccess
+$BPHasDialin
+--------------------------------------
+BP CostCenter Number $usercmsenergyCostCenterNumber
+BP CostCenter Name $usercmsenergyCostCenterName
+--------------------------------------
+$usercmsenergyOffice is the BP's office number
+Telephone $usertelephoneNumber"
+
+
+}
+
+
+$objFormNew.Controls.Add($objLabel) 
+
+$objFormNew.Topmost = $True
+
+$objFormNew.Add_Shown({$objFormNew.Activate()})
+[void] $objFormNew.ShowDialog()
+
+#if($CurrentUserName -ne "ddennis"){
+
+
+if($Locked -eq $True){
+$NotTooLong = 0
+[void] [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
+$a = Get-Process | Where-Object {$_.MainWindowTitle -like "*Internet Explorer*"}
+[Microsoft.VisualBasic.Interaction]::AppActivate($a.ID)
+do{
+[void] [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.VisualBasic")
+$a = Get-Process | Where-Object {$_.MainWindowTitle -like "*Quest One Password Manager*"}
+[Microsoft.VisualBasic.Interaction]::AppActivate($a.ID)
+
+
+
+if($a -eq $null){
+[System.Windows.Forms.SendKeys]::SendWait("(^{TAB})")
+Start-Sleep -m 500
+$NotTooLong++
+if($NotTooLong -eq 10){$a = ""}
+}
+}while($a -eq $null)
+
+$CurrentUserName = $env:username
+
+$win = New-Object -comObject Shell.Application
+$ieQOPMGet = @($win.windows() | ? { $_.locationName -like '*Quest One Password Manager*' })[0]
+$ieQOPMGet.Document.getElementById("UserName").value = "ce\$CurrentUserName";
+
+
+}
+
+
+#}else{Start-Process "$psHome\powershell.exe" 'I:\SD VDI\Documents\Service Desk\New Service Desk Help\Master with backend\Master 0.0.0.5.ps1'}
+
+
+
+
+
+}
+
+
+Function PingPC($PCTAG){
+#Invoke-Item "C:\Users\ddennis\Documents\Batch Files\Links\PingPC.bat"
+
+
+$Ping = ping $PCTAG -n 1 | select-string -pattern "reply"
+
+$search = [ADSISearcher] ""
+$search.Filter = "(cn=$PCTAG)"
+$PCuser = $search.FindOne()  
+
+
+# Get Computer Information
+$PCoperatingsystem = $PCuser.Properties.operatingsystem
+$PCoperatingsystemservicepack = $PCuser.Properties.operatingsystemservicepack
+$PCoperatingsystemversion = $PCuser.Properties.operatingsystemversion
+
+
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") 
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") 
+
+$objFormNew1 = New-Object System.Windows.Forms.Form 
+$objFormNew1.Text = "$Ping"
+$objFormNew1.Size = New-Object System.Drawing.Size(200,200) 
+$objFormNew1.StartPosition = "CenterScreen"
+$objFormNew1.AutoSize = $True
+$objFormNew1.AutoSizeMode = "GrowAndShrink"
+$Font = New-Object System.Drawing.Font("Times New Roman",16,[System.Drawing.FontStyle]::BOLD)
+$objFormNew1.Font = $Font
+$objFormNew1.BackColor = "White"
+#$objFormNew1.ControlBox = $false 
+
+$objFormNew1.KeyPreview = $True
+$objFormNew1.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
+    {$ADAccountLocked=$ButtonYes.Text;$objFormNew1.Close()}})
+$objFormNew1.Add_KeyDown({if ($_.KeyCode -eq "Escape") 
+    {$ADAccountLocked=$NoButton.Text;$objFormNew1.Close()}})
+
+
+$objLabel12 = New-Object System.Windows.Forms.Label
+$objLabel12.Location = New-Object System.Drawing.Size(02,02) 
+$objLabel12.AutoSize = $True
+$objFormNew1.Controls.Add($objLabel12)
+
+if ($Ping -cmatch "Reply"){$objFormNew1.ForeColor = "Green"
+$objLabel12.Text = "The PC is Online
+$Ping
+$PCoperatingsystem
+$PCoperatingsystemservicepack
+OS Version $PCoperatingsystemversion"
+
+}else{
+$objFormNew1.ForeColor = "Red"
+$objLabel12.Text = "The PC is NOT Online
+$Ping"} 
+
+$objFormNew1.Topmost = $True
+
+$objFormNew1.Add_Shown({$objFormNew1.Activate()})
+[void] $objFormNew1.ShowDialog()
+
+}
+
+
+Function Get-IP{
+$CurrentUserName = $env:username
+
+[IO.Directory]::CreateDirectory("\\jaxdfs02\DATA\PUBLIC\SD\GetIP\$CurrentUserName\")
+
+"None" | Out-File \\jaxdfs02\DATA\PUBLIC\SD\GetIP\$CurrentUserName\IP.txt
+
+"\\jaxdfs02\DATA\PUBLIC\SD\GetIP\$CurrentUserName\GetIp.bat\  Please Single click Link. This may take a minute to open" | clip
+
+
+$timer = New-Object System.Windows.Forms.Timer
+$timer.Interval = 2000
+$timer.Start()
+
+
+$timer.add_tick({
+$GetIPForUse = Get-content  "\\jaxdfs02\DATA\PUBLIC\SD\GetIP\$CurrentUserName\IP.txt"
+
+[string]$here = $GetIPForUse | select-string -pattern "IP Address:"
+
+If ($here -ne $null){
+
+$here = $here.Replace("IP Address:                           ", "")
+$here = $here.Replace("127.0.0.1", "")
+$here = $here.Replace(" ", "-")
+$objLabel.Text = "$here"
+$timer.Stop()
+$OKButton.Text = "Copy To Clip"
+
+
+$here | Clip
+}Else{$objLabel.Text = "Waiting on IP"}
+
+})
+
+
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") 
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") 
+
+$objFormTimer = New-Object System.Windows.Forms.Form 
+$objFormTimer.Text = "Instructions"
+$objFormTimer.AutoSize = $True
+$objFormTimer.StartPosition = "CenterScreen"
+$objFormTimer.AutoSizeMode = "GrowAndShrink"
+
+
+$objFormTimer.KeyPreview = $True
+$objFormTimer.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
+    {$x=$objTextBox.Text;$objFormTimer.Close()}})
+$objFormTimer.Add_KeyDown({if ($_.KeyCode -eq "Escape") 
+    {$objFormTimer.Close()}})
+
+$OKButton = New-Object System.Windows.Forms.Button
+$OKButton.Location = New-Object System.Drawing.Size(100,50)
+$OKButton.Size = New-Object System.Drawing.Size(100,23)
+$OKButton.Text = "Stop Waiting"
+$OKButton.Add_Click({$x=$objTextBox.Text;$objFormTimer.Close()})
+$objFormTimer.Controls.Add($OKButton)
+
+$objLabel = New-Object System.Windows.Forms.Label
+$objLabel.Location = New-Object System.Drawing.Size(10,20) 
+#$objLabel.Size = New-Object System.Drawing.Size(100,100) 
+$objLabel.AutoSize = $True
+$objLabel.Text = "Waiting on IP"
+$objFormTimer.Controls.Add($objLabel) 
+
+$objFormTimer.Topmost = $True
+
+$objFormTimer.Add_Shown({$objFormTimer.Activate()})
+[void] $objFormTimer.ShowDialog()
+$here | Clip
+
+"None" | Out-File \\jaxdfs02\DATA\PUBLIC\SD\GetIP\$CurrentUserName\IP.txt
+
+$timer.Stop()
+
+}
+
+
+
+
+
+# =================================================================================== Start Main Program
+
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") 
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") 
+
+$objForm = New-Object System.Windows.Forms.Form 
+$objForm.Text = "HelpDesk Dashboard v3"
+#$objForm.Size = New-Object System.Drawing.Size(270,200) 
+$objForm.StartPosition = "CenterScreen"
+$objForm.ControlBox = $false 
+$objForm.AutoSize = $True
+$objForm.AutoSizeMode = "GrowAndShrink"
+
+$objForm.KeyPreview = $True
+$objForm.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
+    {$Global:Test=$SearchTemplate.Text}})
+$objForm.Add_KeyDown({if ($_.KeyCode -eq "Escape") 
+    {$ADAccountLocked=$NoButton.Text;$objForm.Close()}})
+
+$objLabel = New-Object System.Windows.Forms.Label
+$objLabel.Location = New-Object System.Drawing.Size(10,05) 
+$objLabel.Size = New-Object System.Drawing.Size(125,15) 
+$objLabel.Text = "Dashboard Basic"
+$objForm.Controls.Add($objLabel) 
+
+$Button1 = New-Object System.Windows.Forms.Button
+$Button1.Location = New-Object System.Drawing.Size(10,25)
+$Button1.Size = New-Object System.Drawing.Size(75,23)
+$Button1.Text = "Get IP"
+$Button1.Add_Click({Get-Lync;$PCTAG = $SearchTemplate.Text;Get-IP})
+$objForm.Controls.Add($Button1)
+
+$Button2 = New-Object System.Windows.Forms.Button
+$Button2.Location = New-Object System.Drawing.Size(90,25)
+$Button2.Size = New-Object System.Drawing.Size(75,23)
+$Button2.Text = "Clear IE"
+$Button2.Add_Click({"\\jaxdfs02\DATA\PUBLIC\SD\Clear_IE.bat\ Please Single click Link. This may take a minute to open" | clip;Get-Lync})
+$objForm.Controls.Add($Button2)
+
+$Button3 = New-Object System.Windows.Forms.Button
+$Button3.Location = New-Object System.Drawing.Size(170,25)
+$Button3.Size = New-Object System.Drawing.Size(75,23)
+$Button3.Text = "I Map"
+$Button3.Add_Click({"\\jaxdfs02\DATA\PUBLIC\SD\HomeDriveMapper.bat\ Please Single click Link. This may take a minute to open" | clip;Get-Lync})
+$objForm.Controls.Add($Button3)
+
+$Button4 = New-Object System.Windows.Forms.Button
+$Button4.Location = New-Object System.Drawing.Size(10,50)
+$Button4.Size = New-Object System.Drawing.Size(75,23)
+$Button4.Text = "Ping PC"
+$Button4.Add_Click({if($SearchTemplate.Text -ne ""){if($SearchTemplate -match "PC" -or $SearchTemplate -cmatch "vserdesk" -or $SearchTemplate -cmatch "FW" -or $SearchTemplate -cmatch "pc" -or $SearchTemplate -cmatch "HH" -or $SearchTemplate -cmatch "hh" -or $SearchTemplate -cmatch "fw"){$PCTAG = $SearchTemplate.Text;PingPC $PCTAG}else{$InputLabel.Text = "What is the PC TAG?"}}else{$InputLabel.Text = "What is the PC TAG?"}})
+$objForm.Controls.Add($Button4)
+
+$Button5 = New-Object System.Windows.Forms.Button
+$Button5.Location = New-Object System.Drawing.Size(90,50)
+$Button5.Size = New-Object System.Drawing.Size(75,23)
+$Button5.Text = "AD Check"
+$Button5.Add_Click({if($SearchTemplate.Text -ne ""){if($SearchTemplate -cnotmatch "PC"){Check-AD}else{$InputLabel.Text = "What is the username to lookup?"}}else{$InputLabel.Text = "What is the username to lookup?"}})
+$objForm.Controls.Add($Button5)
+
+$Button6 = New-Object System.Windows.Forms.Button
+$Button6.Location = New-Object System.Drawing.Size(170,50)
+$Button6.Size = New-Object System.Drawing.Size(75,23)
+$Button6.Text = "Exit"
+$Button6.Add_Click({$objForm.Close()})
+$objForm.Controls.Add($Button6)
+
+$InputLabel = New-Object System.Windows.Forms.Label
+$InputLabel.Location = New-Object System.Drawing.Size(10,75) 
+$InputLabel.Size = New-Object System.Drawing.Size(200,15) 
+$InputLabel.Text = "Input Box"
+$objForm.Controls.Add($InputLabel) 
+
+#begin to draw text box
+$SearchTemplate = New-Object System.Windows.Forms.TextBox
+$SearchTemplate.Location = New-Object System.Drawing.Size(10,95)
+$SearchTemplate.Size = New-Object System.Drawing.Size(155,20)
+$SearchTemplate.Height = 80
+$SearchTemplate.Text = ""
+$SearchTemplate.Add_KeyDown({if ($_.KeyCode -eq "Enter"){if($SearchTemplate.Text -ne ""){if($SearchTemplate -cnotmatch "PC" -or $SearchTemplate -cnotmatch "HH"){Check-AD}else{if($SearchTemplate -match "PC" -or $SearchTemplate -cmatch "vserdesk" -or $SearchTemplate -cmatch "FW" -or $SearchTemplate -cmatch "pc" -or $SearchTemplate -cmatch "HH" -or $SearchTemplate -cmatch "hh" -or $SearchTemplate -cmatch "fw"){$PCTAG = $SearchTemplate.Text;PingPC $PCTAG}}}}})
+$SearchTemplate.AutoCompleteCustomSource.Add("System.Windows.Forms");
+Get-content "\\jaxdfs02\DATA\PUBLIC\SD\HelpDeskDashboard\Backend\InputAutoComplete.txt" | % {$SearchTemplate.AutoCompleteCustomSource.AddRange($_) }
+$SearchTemplate.AutoCompleteMode =[System.Windows.Forms.AutoCompleteMode]::SuggestAppend
+$SearchTemplate.AutoCompleteSource =[System.Windows.Forms.AutoCompleteSource]::CustomSource
+$objForm.Controls.Add($SearchTemplate)
+
+Function ButtonAdvanced-Switch{
+$objLabel.Text = "Dashboard Advanced"
+$objForm.Controls.Add($TemplateGet)
+$objForm.Controls.Add($GetAdmin)
+$objForm.Controls.Add($AdminUserID)
+$objForm.Controls.Add($AdminPW)
+$objForm.Controls.Add($AdminUserIDGet)
+$objForm.Controls.Add($AdminPWGet)
+$objForm.Controls.Add($GetRicoh)
+# Remove Basic Controls
+#$objForm.Controls.Remove($Button1)
+#$objForm.Controls.Remove($Button2)
+#$objForm.Controls.Remove($Button3)
+#$objForm.Controls.Remove($Button4)
+}
+
+Function ButtonBasic-Switch{
+$objLabel.Text = "Dashboard Basic"
+$objForm.Controls.Remove($TemplateGet)
+$objForm.Controls.Remove($GetAdmin)
+$objForm.Controls.Remove($AdminUserID)
+$objForm.Controls.Remove($AdminPW)
+$objForm.Controls.Remove($AdminUserIDGet)
+$objForm.Controls.Remove($AdminPWGet)
+$objForm.Controls.Remove($GetRicoh)
+# Show Basic Controls
+#$objForm.Controls.Add($Button1)
+#$objForm.Controls.Add($Button2)
+#$objForm.Controls.Add($Button3)
+#$objForm.Controls.Add($Button4)
+}
+
+
+$ButtonAdvanced = New-Object System.Windows.Forms.Button
+$ButtonAdvanced.Location = New-Object System.Drawing.Size(170,93)
+$ButtonAdvanced.Size = New-Object System.Drawing.Size(75,23)
+$ButtonAdvanced.Text = "Advanced"
+$ButtonAdvanced.Add_Click({if($ButtonAdvanced.Text -eq "Advanced"){$ButtonAdvanced.Text = "Basic";ButtonAdvanced-Switch}Else{$ButtonAdvanced.Text = "Advanced";ButtonBasic-Switch}})
+$objForm.Controls.Add($ButtonAdvanced)
+
+$GetRicoh = New-Object System.Windows.Forms.Button
+$GetRicoh.Location = New-Object System.Drawing.Size(170,120)
+$GetRicoh.Size = New-Object System.Drawing.Size(75,23)
+$GetRicoh.Text = "Ricoh"
+$GetRicoh.Add_Click({Ricoh})
+
+$TemplateGet = New-Object System.Windows.Forms.Button
+$TemplateGet.Location = New-Object System.Drawing.Size(10,120)
+$TemplateGet.Size = New-Object System.Drawing.Size(75,23)
+$TemplateGet.Text = "Template"
+$TemplateGet.Add_Click({if($CurrentUserName -eq "ddennis"){Start-Process "$psHome\powershell.exe" 'C:\Users\ddennis\Documents\Master.ps1'}Else{ Start-Process "$psHome\powershell.exe" 'K:\HELPDESK\DougD\Get-Template.ps1'}})
+
+$GetAdmin = New-Object System.Windows.Forms.Button
+$GetAdmin.Location = New-Object System.Drawing.Size(90,120)
+$GetAdmin.Size = New-Object System.Drawing.Size(75,23)
+$GetAdmin.Text = "Get Admin"
+$GetAdmin.Add_Click({Get-Admin})
+
+
+#begin to draw text box
+$AdminUserID = New-Object System.Windows.Forms.TextBox
+$AdminUserID.Location = New-Object System.Drawing.Size(10,150)
+$AdminUserID.Size = New-Object System.Drawing.Size(155,20)
+$AdminUserID.Height = 80
+$AdminUserID.Text = "SA_ServDeskAdmin"
+#$AdminUserID.Add_KeyDown({})
+$AdminUserID.AutoCompleteCustomSource.Add("System.Windows.Forms");
+Get-content "\\jaxdfs02\DATA\PUBLIC\SD\HelpDeskDashboard\Backend\UserIDAutoComplete.txt" | % {$AdminUserID.AutoCompleteCustomSource.AddRange($_) }
+$AdminUserID.AutoCompleteMode =[System.Windows.Forms.AutoCompleteMode]::SuggestAppend
+$AdminUserID.AutoCompleteSource =[System.Windows.Forms.AutoCompleteSource]::CustomSource
+
+$AdminUserIDGet = New-Object System.Windows.Forms.Button
+$AdminUserIDGet.Location = New-Object System.Drawing.Size(170,150)
+$AdminUserIDGet.Size = New-Object System.Drawing.Size(75,23)
+$AdminUserIDGet.Text = "Get ID"
+$AdminUserIDGet.Add_Click({$AdminUserID.Text | clip})
+
+
+$AdminPW = New-Object System.Windows.Forms.TextBox
+$AdminPW.Location = New-Object System.Drawing.Size(10,175)
+$AdminPW.Size = New-Object System.Drawing.Size(155,20)
+$AdminPW.Height = 80
+$AdminPW.Text = ""
+$AdminPW.Add_KeyDown({})
+
+$AdminPWGet = New-Object System.Windows.Forms.Button
+$AdminPWGet.Location = New-Object System.Drawing.Size(170,175)
+$AdminPWGet.Size = New-Object System.Drawing.Size(75,23)
+$AdminPWGet.Text = "Get PW"
+$AdminPWGet.Add_Click({$AdminPW.Text | clip})
+
+
+$objForm.Topmost = $True
+
+$objForm.Add_Shown({$objForm.Activate()})
+[void] $objForm.ShowDialog()
+
+Cls
+
+
+# PS Version too old. Please update. Some feature may not work.
+}Else{
+
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") 
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") 
+
+$objForm = New-Object System.Windows.Forms.Form 
+$objForm.Text = "Instructions"
+$objForm.Size = New-Object System.Drawing.Size(500,150) 
+$objForm.StartPosition = "CenterScreen"
+$objForm.AutoSize = $True
+$objForm.AutoSizeMode = "GrowAndShrink"
+
+$objForm.KeyPreview = $True
+$objForm.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
+    {$x=$objTextBox.Text;$objForm.Close()}})
+$objForm.Add_KeyDown({if ($_.KeyCode -eq "Escape") 
+    {$objForm.Close()}})
+
+$OKButton = New-Object System.Windows.Forms.Button
+$OKButton.Location = New-Object System.Drawing.Size(200,75)
+$OKButton.Size = New-Object System.Drawing.Size(75,23)
+$OKButton.Text = "OK"
+$OKButton.Add_Click({$x=$objTextBox.Text;$objForm.Close()})
+$objForm.Controls.Add($OKButton)
+
+$objLabel = New-Object System.Windows.Forms.Label
+$objLabel.Location = New-Object System.Drawing.Size(10,20) 
+$objLabel.Size = New-Object System.Drawing.Size(500,20) 
+$objLabel.Text = "Your Version of Powershell is too old. Some Features may not work or will be unavailible"
+$objForm.Controls.Add($objLabel) 
+
+
+
+$objForm.Topmost = $True
+
+$objForm.Add_Shown({$objForm.Activate()})
+[void] $objForm.ShowDialog()
+
+
+Add-Content \\jaxdfs02\DATA\PUBLIC\SD\HelpDeskDashboard\Backend\TroubleShooting\NeedsUpdating\GettingOldError.txt $CurrentAndPSVersion
+
+
+# =================================================================================== Start Main Program
+
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing") 
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") 
+
+$objForm = New-Object System.Windows.Forms.Form 
+$objForm.Text = "HelpDesk Dashboard v3"
+#$objForm.Size = New-Object System.Drawing.Size(270,200) 
+$objForm.StartPosition = "CenterScreen"
+$objForm.ControlBox = $false 
+$objForm.AutoSize = $True
+$objForm.AutoSizeMode = "GrowAndShrink"
+
+$objForm.KeyPreview = $True
+$objForm.Add_KeyDown({if ($_.KeyCode -eq "Enter") 
+    {$Global:Test=$SearchTemplate.Text}})
+$objForm.Add_KeyDown({if ($_.KeyCode -eq "Escape") 
+    {$ADAccountLocked=$NoButton.Text;$objForm.Close()}})
+
+$objLabel = New-Object System.Windows.Forms.Label
+$objLabel.Location = New-Object System.Drawing.Size(10,05) 
+$objLabel.Size = New-Object System.Drawing.Size(125,15) 
+$objLabel.Text = "Dashboard Basic"
+$objForm.Controls.Add($objLabel) 
+
+$Button1 = New-Object System.Windows.Forms.Button
+$Button1.Location = New-Object System.Drawing.Size(10,25)
+$Button1.Size = New-Object System.Drawing.Size(75,23)
+$Button1.Text = "Get IP"
+#$Button1.Add_Click({Get-Lync;$PCTAG = $SearchTemplate.Text;Get-IP})
+$objForm.Controls.Add($Button1)
+
+$Button2 = New-Object System.Windows.Forms.Button
+$Button2.Location = New-Object System.Drawing.Size(90,25)
+$Button2.Size = New-Object System.Drawing.Size(75,23)
+$Button2.Text = "Clear IE"
+#$Button2.Add_Click({"\\jaxdfs02\DATA\PUBLIC\SD\Clear_IE.bat\ Please Single click Link. This may take a minute to open" | clip;Get-Lync})
+$objForm.Controls.Add($Button2)
+
+$Button3 = New-Object System.Windows.Forms.Button
+$Button3.Location = New-Object System.Drawing.Size(170,25)
+$Button3.Size = New-Object System.Drawing.Size(75,23)
+$Button3.Text = "I Map"
+#$Button3.Add_Click({"\\jaxdfs02\DATA\PUBLIC\SD\HomeDriveMapper.bat\ Please Single click Link. This may take a minute to open" | clip;Get-Lync})
+$objForm.Controls.Add($Button3)
+
+$Button4 = New-Object System.Windows.Forms.Button
+$Button4.Location = New-Object System.Drawing.Size(10,50)
+$Button4.Size = New-Object System.Drawing.Size(75,23)
+$Button4.Text = "Ping PC"
+#$Button4.Add_Click({if($SearchTemplate.Text -ne ""){if($SearchTemplate -match "PC" -or $SearchTemplate -cmatch "vserdesk" -or $SearchTemplate -cmatch "FW"){$PCTAG = $SearchTemplate.Text;PingPC $PCTAG}else{$InputLabel.Text = "What is the PC TAG?"}}else{$InputLabel.Text = "What is the PC TAG?"}})
+$objForm.Controls.Add($Button4)
+
+$Button5 = New-Object System.Windows.Forms.Button
+$Button5.Location = New-Object System.Drawing.Size(90,50)
+$Button5.Size = New-Object System.Drawing.Size(75,23)
+$Button5.Text = "AD Check"
+#$Button5.Add_Click({if($SearchTemplate.Text -ne ""){if($SearchTemplate -cnotmatch "PC"){Check-AD}else{$InputLabel.Text = "What is the username to lookup?"}}else{$InputLabel.Text = "What is the username to lookup?"}})
+$objForm.Controls.Add($Button5)
+
+$Button6 = New-Object System.Windows.Forms.Button
+$Button6.Location = New-Object System.Drawing.Size(170,50)
+$Button6.Size = New-Object System.Drawing.Size(75,23)
+$Button6.Text = "Exit"
+#$Button6.Add_Click({$objForm.Close()})
+$objForm.Controls.Add($Button6)
+
+$InputLabel = New-Object System.Windows.Forms.Label
+$InputLabel.Location = New-Object System.Drawing.Size(10,75) 
+$InputLabel.Size = New-Object System.Drawing.Size(200,15) 
+$InputLabel.Text = "Input Box"
+$objForm.Controls.Add($InputLabel) 
+
+#begin to draw text box
+$SearchTemplate = New-Object System.Windows.Forms.TextBox
+$SearchTemplate.Location = New-Object System.Drawing.Size(10,95)
+$SearchTemplate.Size = New-Object System.Drawing.Size(155,20)
+$SearchTemplate.Height = 80
+$SearchTemplate.Text = ""
+#$SearchTemplate.Add_KeyDown({if ($_.KeyCode -eq "Enter"){if($SearchTemplate.Text -ne ""){if($SearchTemplate -cnotmatch "PC"){Check-AD}else{PingPC}}}})
+#$SearchTemplate.AutoCompleteCustomSource.Add("System.Windows.Forms");
+#Get-content "\\jaxdfs02\DATA\PUBLIC\SD\HelpDeskDashboard\Backend\InputAutoComplete.txt" | % {$SearchTemplate.AutoCompleteCustomSource.AddRange($_) }
+#$SearchTemplate.AutoCompleteMode =[System.Windows.Forms.AutoCompleteMode]::SuggestAppend
+#$SearchTemplate.AutoCompleteSource =[System.Windows.Forms.AutoCompleteSource]::CustomSource
+$objForm.Controls.Add($SearchTemplate)
+
+Function ButtonAdvanced-Switch{
+#$objLabel.Text = "Dashboard Advanced"
+$objForm.Controls.Add($TemplateGet)
+$objForm.Controls.Add($GetAdmin)
+$objForm.Controls.Add($AdminUserID)
+$objForm.Controls.Add($AdminPW)
+$objForm.Controls.Add($AdminUserIDGet)
+$objForm.Controls.Add($AdminPWGet)
+$objForm.Controls.Add($GetRicoh)
+# Remove Basic Controls
+#$objForm.Controls.Remove($Button1)
+#$objForm.Controls.Remove($Button2)
+#$objForm.Controls.Remove($Button3)
+#$objForm.Controls.Remove($Button4)
+}
+
+Function ButtonBasic-Switch{
+#$objLabel.Text = "Dashboard Basic"
+$objForm.Controls.Remove($TemplateGet)
+$objForm.Controls.Remove($GetAdmin)
+$objForm.Controls.Remove($AdminUserID)
+$objForm.Controls.Remove($AdminPW)
+$objForm.Controls.Remove($AdminUserIDGet)
+$objForm.Controls.Remove($AdminPWGet)
+$objForm.Controls.Remove($GetRicoh)
+# Show Basic Controls
+#$objForm.Controls.Add($Button1)
+#$objForm.Controls.Add($Button2)
+#$objForm.Controls.Add($Button3)
+#$objForm.Controls.Add($Button4)
+}
+
+
+$ButtonAdvanced = New-Object System.Windows.Forms.Button
+$ButtonAdvanced.Location = New-Object System.Drawing.Size(170,93)
+$ButtonAdvanced.Size = New-Object System.Drawing.Size(75,23)
+$ButtonAdvanced.Text = "Advanced"
+$ButtonAdvanced.Add_Click({if($ButtonAdvanced.Text -eq "Advanced"){$ButtonAdvanced.Text = "Basic";ButtonAdvanced-Switch}Else{$ButtonAdvanced.Text = "Advanced";ButtonBasic-Switch}})
+$objForm.Controls.Add($ButtonAdvanced)
+
+$GetRicoh = New-Object System.Windows.Forms.Button
+$GetRicoh.Location = New-Object System.Drawing.Size(170,120)
+$GetRicoh.Size = New-Object System.Drawing.Size(75,23)
+$GetRicoh.Text = "Ricoh"
+#$GetRicoh.Add_Click({Ricoh})
+
+$TemplateGet = New-Object System.Windows.Forms.Button
+$TemplateGet.Location = New-Object System.Drawing.Size(10,120)
+$TemplateGet.Size = New-Object System.Drawing.Size(75,23)
+$TemplateGet.Text = "Template"
+#$TemplateGet.Add_Click({if($CurrentUserName -eq "ddennis"){Start-Process "$psHome\powershell.exe" 'C:\Users\ddennis\Documents\Master.ps1'}Else{ Start-Process "$psHome\powershell.exe" 'K:\HELPDESK\DougD\Get-Template.ps1'}})
+
+$GetAdmin = New-Object System.Windows.Forms.Button
+$GetAdmin.Location = New-Object System.Drawing.Size(90,120)
+$GetAdmin.Size = New-Object System.Drawing.Size(75,23)
+$GetAdmin.Text = "Get Admin"
+#$GetAdmin.Add_Click({Get-Admin})
+
+
+#begin to draw text box
+$AdminUserID = New-Object System.Windows.Forms.TextBox
+$AdminUserID.Location = New-Object System.Drawing.Size(10,150)
+$AdminUserID.Size = New-Object System.Drawing.Size(155,20)
+$AdminUserID.Height = 80
+$AdminUserID.Text = "SA_ServDeskAdmin"
+#$AdminUserID.Add_KeyDown({})
+$AdminUserID.AutoCompleteCustomSource.Add("System.Windows.Forms");
+Get-content "\\jaxdfs02\DATA\PUBLIC\SD\HelpDeskDashboard\Backend\UserIDAutoComplete.txt" | % {$AdminUserID.AutoCompleteCustomSource.AddRange($_) }
+$AdminUserID.AutoCompleteMode =[System.Windows.Forms.AutoCompleteMode]::SuggestAppend
+$AdminUserID.AutoCompleteSource =[System.Windows.Forms.AutoCompleteSource]::CustomSource
+
+$AdminUserIDGet = New-Object System.Windows.Forms.Button
+$AdminUserIDGet.Location = New-Object System.Drawing.Size(170,150)
+$AdminUserIDGet.Size = New-Object System.Drawing.Size(75,23)
+$AdminUserIDGet.Text = "Get ID"
+$AdminUserIDGet.Add_Click({$AdminUserID.Text | clip})
+
+
+$AdminPW = New-Object System.Windows.Forms.TextBox
+$AdminPW.Location = New-Object System.Drawing.Size(10,175)
+$AdminPW.Size = New-Object System.Drawing.Size(155,20)
+$AdminPW.Height = 80
+$AdminPW.Text = ""
+$AdminPW.Add_KeyDown({})
+
+$AdminPWGet = New-Object System.Windows.Forms.Button
+$AdminPWGet.Location = New-Object System.Drawing.Size(170,175)
+$AdminPWGet.Size = New-Object System.Drawing.Size(75,23)
+$AdminPWGet.Text = "Get PW"
+$AdminPWGet.Add_Click({$AdminPW.Text | clip})
+
+
+$objForm.Topmost = $True
+
+$objForm.Add_Shown({$objForm.Activate()})
+[void] $objForm.ShowDialog()
+
+Cls
+
+
+
+
+
+}
